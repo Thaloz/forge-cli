@@ -1,5 +1,5 @@
 import { featureStructureValidator } from "./feature-structure.js";
-import { componentLocationValidator, hookLocationValidator } from "./locations.js";
+import { componentLocationValidator, componentSubdirValidator, hookLocationValidator } from "./locations.js";
 import { thinRoutesValidator } from "./thin-routes.js";
 import { crossFeatureValidator } from "./cross-feature.js";
 import { featureParityValidator } from "./feature-parity.js";
@@ -10,6 +10,7 @@ export type { ValidationResult, Validator };
 export const validators: Validator[] = [
   featureStructureValidator,
   componentLocationValidator,
+  componentSubdirValidator,
   hookLocationValidator,
   thinRoutesValidator,
   crossFeatureValidator,

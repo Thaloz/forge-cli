@@ -33,10 +33,20 @@ forge check           # Validate architecture (run before finishing)
 ```
 src/routes/         → Thin route files (import from features, no logic)
 src/features/       → Feature code (components/, hooks.ts)
-src/components/     → Shared UI only
+src/components/ui/  → shadcn primitives only
+src/components/     → Truly shared components (Header, Footer, Logo)
 src/lib/            → Utilities
 convex/features/    → Backend (mirrors src/features/)
 ```
+
+## Where Components Go
+
+- `src/components/ui/*` → shadcn primitives (Button, Card, Dialog)
+- `src/components/*.tsx` → Truly shared components used across multiple pages
+- `src/features/<name>/components/` → Page-specific components
+
+**IMPORTANT:** NO subdirectories in `src/components/` except `ui/`.
+If you need 3+ components for a page, create a feature with `forge add:feature`.
 
 ## Rules
 

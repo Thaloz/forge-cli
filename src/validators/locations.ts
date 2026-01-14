@@ -41,6 +41,36 @@ export const componentLocationValidator: Validator = {
   },
 };
 
+export const componentSubdirValidator: Validator = {
+  name: "Component subdirectories",
+
+  async validate(cwd: string): Promise<ValidationResult> {
+    const errors: ValidationResult["errors"] = [];
+    const warnings: ValidationResult["warnings"] = [];
+
+    // Find subdirectories in src/components/ (excluding ui/)
+    const subdirs = await fg("src/components/*/", {
+      cwd,
+      onlyDirectories: true,
+      ignore: ["src/components/ui"],
+    });
+
+    for (const dir of subdirs) {
+      warnings.push({
+        file: dir,
+        message: "Subdirectory in src/components/ - consider using a feature for page-specific components",
+      });
+    }
+
+    return {
+      rule: this.name,
+      passed: true, // Warnings don't fail the check
+      errors,
+      warnings,
+    };
+  },
+};
+
 export const hookLocationValidator: Validator = {
   name: "Hook locations",
 

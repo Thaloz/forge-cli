@@ -1,0 +1,42 @@
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+
+/**
+ * Hook for uploading files to Convex storage
+ */
+export function useUpload() {
+  const generateUploadUrl = useMutation(api.lib.storage.generateUploadUrl);
+
+  const upload = async (file: File): Promise<Id<"_storage">> => {
+    const uploadUrl = await generateUploadUrl();
+
+    const response = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+
+    const { storageId } = await response.json();
+    return storageId;
+  };
+
+  return { upload };
+}
+
+/**
+ * Hook for getting a file URL
+ */
+export function useFileUrl(storageId: Id<"_storage"> | null | undefined) {
+  return useQuery(
+    api.lib.storage.getUrl,
+    storageId ? { storageId } : "skip"
+  );
+}
+
+/**
+ * Hook for deleting a file
+ */
+export function useDeleteFile() {
+  return useMutation(api.lib.storage.deleteFile);
+}

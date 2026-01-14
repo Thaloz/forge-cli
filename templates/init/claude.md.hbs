@@ -22,11 +22,22 @@ The ONLY route you may create directly is `src/routes/index.tsx` (homepage).
 ## Commands
 
 ```bash
-pnpm dev              # Start dev server
-npx convex dev        # Start Convex backend
-pnpm lint             # Check with Biome
-forge check           # Validate architecture (run before finishing)
+pnpm dev                       # Start dev server
+npx convex dev                 # Start Convex backend
+pnpm lint                      # Check with Biome
+forge add:feature <name>       # Scaffold a new feature
+forge add:integration auth     # Add Convex Auth
+forge add:integration storage  # Add Convex file storage
+forge check                    # Validate architecture (run before finishing)
 ```
+
+## Integrations
+
+For infrastructure (not features), use `forge add:integration`:
+- `auth` - Convex Auth with GitHub/Google OAuth
+- `storage` - Convex file upload/download
+
+These create files in `convex/` and `src/lib/` - NOT in features.
 
 ## Architecture
 
@@ -35,8 +46,10 @@ src/routes/         → Thin route files (import from features, no logic)
 src/features/       → Feature code (components/, hooks.ts)
 src/components/ui/  → shadcn primitives only
 src/components/     → Truly shared components (Header, Footer, Logo)
-src/lib/            → Utilities
+src/lib/            → Utilities + integration hooks (auth.ts, storage.ts)
 convex/features/    → Backend (mirrors src/features/)
+convex/lib/         → Shared backend utilities (storage.ts)
+convex/auth.ts      → Auth configuration (from forge add:integration auth)
 ```
 
 ## Where Components Go

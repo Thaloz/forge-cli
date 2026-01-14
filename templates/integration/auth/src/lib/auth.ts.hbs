@@ -1,0 +1,14 @@
+import { useConvexAuth } from "convex/react";
+
+/**
+ * Hook to get authentication state
+ */
+export function useAuth() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  return { isAuthenticated, isLoading };
+}
+
+/**
+ * Re-export auth components for convenience
+ */
+export { Authenticated, Unauthenticated, AuthLoading } from "convex/react";

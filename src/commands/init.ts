@@ -1,14 +1,35 @@
 import { defineCommand } from "citty";
+import { spawn } from "child_process";
 import { join } from "path";
 import { logger } from "../utils/logger.js";
 import { renderTemplate } from "../utils/template.js";
-import { writeFile, fileExists, ensureDir } from "../utils/fs.js";
+import { writeFile, fileExists, ensureDir, readFile } from "../utils/fs.js";
 import { kebabCase } from "../utils/case.js";
 import pc from "picocolors";
 
-interface FileToCreate {
-  templatePath: string;
-  destPath: string;
+/**
+ * Run a command interactively (stdio: inherit)
+ */
+function runInteractive(
+  cmd: string,
+  args: string[],
+  cwd?: string
+): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn(cmd, args, {
+      stdio: "inherit",
+      shell: true,
+      cwd,
+    });
+    proc.on("close", (code) => {
+      if (code === 0) {
+        resolve(code);
+      } else {
+        reject(new Error(`Command failed with code ${code}`));
+      }
+    });
+    proc.on("error", reject);
+  });
 }
 
 export default defineCommand({
@@ -36,44 +57,105 @@ export default defineCommand({
     }
 
     logger.blank();
-    logger.log(`  Creating project "${name}"...`);
+    logger.log(`  ${pc.bold("Forge CLI")} - Creating project "${name}"`);
     logger.blank();
+
+    // Step 1: Run TanStack Start scaffolding
+    logger.log(`  ${pc.cyan("Step 1/5:")} TanStack Start setup`);
+    logger.blank();
+    try {
+      await runInteractive("pnpm", ["create", "@tanstack/start@latest", name]);
+    } catch {
+      logger.error("TanStack Start scaffolding failed");
+      process.exit(1);
+    }
+
+    // Step 2: Add forge customizations
+    logger.blank();
+    logger.log(`  ${pc.cyan("Step 2/5:")} Adding Forge customizations...`);
+
+    // Add dependencies to package.json
+    const pkgPath = join(projectDir, "package.json");
+    const pkg = JSON.parse(await readFile(pkgPath));
+    pkg.dependencies = {
+      ...pkg.dependencies,
+      convex: "^1.31.4",
+      clsx: "^2.1.1",
+      "tailwind-merge": "^3.4.0",
+    };
+    pkg.devDependencies = {
+      ...pkg.devDependencies,
+      "@biomejs/biome": "^1.9.4",
+      autoprefixer: "^10.4.20",
+      postcss: "^8.5.0",
+      tailwindcss: "^3.4.17",
+    };
+    // Add biome scripts
+    pkg.scripts = {
+      ...pkg.scripts,
+      lint: "biome check .",
+      "lint:fix": "biome check . --write",
+      format: "biome format . --write",
+    };
+    await writeFile(pkgPath, JSON.stringify(pkg, null, 2));
+    logger.success("Updated package.json with Convex & Tailwind deps");
+
+    // Add path aliases to tsconfig.json
+    const tsconfigPath = join(projectDir, "tsconfig.json");
+    const tsconfig = JSON.parse(await readFile(tsconfigPath));
+    tsconfig.compilerOptions = {
+      ...tsconfig.compilerOptions,
+      paths: {
+        ...tsconfig.compilerOptions?.paths,
+        "~/*": ["./src/*"],
+        "@convex/*": ["./convex/*"],
+      },
+    };
+    await writeFile(tsconfigPath, JSON.stringify(tsconfig, null, 2));
+    logger.success("Added path aliases to tsconfig.json");
 
     const templateData = { name };
 
-    // Define files to create
-    const files: FileToCreate[] = [
-      // Root config files
-      { templatePath: "init/package.json.hbs", destPath: join(projectDir, "package.json") },
-      { templatePath: "init/tsconfig.json.hbs", destPath: join(projectDir, "tsconfig.json") },
+    // Write forge-specific files
+    const forgeFiles = [
       { templatePath: "init/biome.json.hbs", destPath: join(projectDir, "biome.json") },
       { templatePath: "init/tailwind.config.ts.hbs", destPath: join(projectDir, "tailwind.config.ts") },
       { templatePath: "init/postcss.config.js.hbs", destPath: join(projectDir, "postcss.config.js") },
-      { templatePath: "init/vite.config.ts.hbs", destPath: join(projectDir, "vite.config.ts") },
-
-      // Src files
-      { templatePath: "init/src/router.tsx.hbs", destPath: join(projectDir, "src/router.tsx") },
-      { templatePath: "init/src/routes/__root.tsx.hbs", destPath: join(projectDir, "src/routes/__root.tsx") },
-      { templatePath: "init/src/routes/index.tsx.hbs", destPath: join(projectDir, "src/routes/index.tsx") },
+      { templatePath: "init/convex/schema.ts.hbs", destPath: join(projectDir, "convex/schema.ts") },
       { templatePath: "init/src/lib/cn.ts.hbs", destPath: join(projectDir, "src/lib/cn.ts") },
       { templatePath: "init/src/providers/index.tsx.hbs", destPath: join(projectDir, "src/providers/index.tsx") },
-
-      // Convex files
-      { templatePath: "init/convex/schema.ts.hbs", destPath: join(projectDir, "convex/schema.ts") },
-
-      // CLAUDE.md - THE HOOK
       { templatePath: "init/claude.md.hbs", destPath: join(projectDir, "CLAUDE.md") },
     ];
 
-    // Create all files
-    for (const file of files) {
+    for (const file of forgeFiles) {
       const content = renderTemplate(file.templatePath, templateData);
       await writeFile(file.destPath, content);
       const relativePath = file.destPath.replace(projectDir + "/", "");
       logger.success(`Created ${relativePath}`);
     }
 
-    // Create empty directories
+    // Modify __root.tsx to add Providers
+    const rootPath = join(projectDir, "src/routes/__root.tsx");
+    if (await fileExists(rootPath)) {
+      let rootContent = await readFile(rootPath);
+
+      // Add Providers import
+      if (!rootContent.includes("Providers")) {
+        rootContent = `import { Providers } from "../providers";\n${rootContent}`;
+
+        // Wrap body children with Providers
+        // Look for pattern like: <body>...{children}...</body> or similar
+        rootContent = rootContent.replace(
+          /(<body[^>]*>)([\s\S]*?)(<\/body>)/,
+          "$1<Providers>$2</Providers>$3"
+        );
+
+        await writeFile(rootPath, rootContent);
+        logger.success("Modified __root.tsx to use Providers");
+      }
+    }
+
+    // Create directory structure
     const emptyDirs = [
       join(projectDir, "src/components/ui"),
       join(projectDir, "src/features"),
@@ -83,43 +165,72 @@ export default defineCommand({
 
     for (const dir of emptyDirs) {
       await ensureDir(dir);
-      // Create .gitkeep to track empty directories
       await writeFile(join(dir, ".gitkeep"), "");
     }
+    logger.success("Created directory structure");
 
-    // Create global CSS file
-    const globalCss = `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-`;
-    await writeFile(join(projectDir, "src/styles.css"), globalCss);
-    logger.success("Created src/styles.css");
+    // Create styles.css with Tailwind directives
+    const stylesPath = join(projectDir, "src/styles.css");
+    const existingStyles = await fileExists(stylesPath) ? await readFile(stylesPath) : "";
+    if (!existingStyles.includes("@tailwind")) {
+      const tailwindDirectives = `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n`;
+      await writeFile(stylesPath, tailwindDirectives + existingStyles);
+      logger.success("Added Tailwind directives to styles.css");
+    }
 
-    // Create .gitignore
-    const gitignore = `node_modules
-dist
-.output
-.env
-.env.local
-`;
-    await writeFile(join(projectDir, ".gitignore"), gitignore);
-    logger.success("Created .gitignore");
+    // Update .gitignore
+    const gitignorePath = join(projectDir, ".gitignore");
+    let gitignore = await fileExists(gitignorePath) ? await readFile(gitignorePath) : "";
+    const additions = [".env", ".env.local", ".output", "convex/_generated"];
+    for (const item of additions) {
+      if (!gitignore.includes(item)) {
+        gitignore += `\n${item}`;
+      }
+    }
+    await writeFile(gitignorePath, gitignore.trim() + "\n");
+    logger.success("Updated .gitignore");
 
     // Create .env.example
-    const envExample = `VITE_CONVEX_URL=
-`;
-    await writeFile(join(projectDir, ".env.example"), envExample);
+    await writeFile(join(projectDir, ".env.example"), "VITE_CONVEX_URL=\n");
     logger.success("Created .env.example");
 
+    // Step 3: Install dependencies
     logger.blank();
-    logger.log(`  ${pc.green("Project created successfully!")}`);
+    logger.log(`  ${pc.cyan("Step 3/5:")} Installing dependencies...`);
     logger.blank();
-    logger.log("  Next steps:");
-    logger.log(`    1. ${pc.cyan(`cd ${name}`)}`);
-    logger.log(`    2. ${pc.cyan("pnpm install")}`);
-    logger.log(`    3. ${pc.cyan("npx convex dev --once --configure=new")}`);
-    logger.log(`    4. ${pc.cyan("pnpm dlx shadcn@latest init")}`);
-    logger.log(`    5. ${pc.cyan("pnpm dev")}`);
+    try {
+      await runInteractive("pnpm", ["install"], projectDir);
+    } catch {
+      logger.error("Failed to install dependencies");
+      process.exit(1);
+    }
+
+    // Step 4: Convex setup
+    logger.blank();
+    logger.log(`  ${pc.cyan("Step 4/5:")} Convex setup`);
+    logger.blank();
+    try {
+      await runInteractive("npx", ["convex", "dev", "--once", "--configure=new"], projectDir);
+    } catch {
+      logger.warn("Convex setup skipped or failed - you can run it later");
+    }
+
+    // Step 5: shadcn setup
+    logger.blank();
+    logger.log(`  ${pc.cyan("Step 5/5:")} shadcn/ui setup`);
+    logger.blank();
+    try {
+      await runInteractive("pnpm", ["dlx", "shadcn@latest", "init"], projectDir);
+    } catch {
+      logger.warn("shadcn setup skipped or failed - you can run it later");
+    }
+
+    // Done!
+    logger.blank();
+    logger.log(`  ${pc.green("✓")} ${pc.bold("Project created successfully!")}`);
+    logger.blank();
+    logger.log(`  ${pc.cyan("cd")} ${name}`);
+    logger.log(`  ${pc.cyan("pnpm dev")}`);
     logger.blank();
     logger.log(`  ${pc.dim("CLAUDE.md is configured. Claude Code will use forge CLI automatically.")}`);
     logger.blank();

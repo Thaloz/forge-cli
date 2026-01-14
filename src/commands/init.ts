@@ -93,9 +93,9 @@ export default defineCommand({
       pkg.devDependencies = {
         ...pkg.devDependencies,
         "@biomejs/biome": "^1.9.4",
-        autoprefixer: "^10.4.20",
-        postcss: "^8.5.0",
-        tailwindcss: "^3.4.17",
+        autoprefixer: "^10.4.23",
+        postcss: "^8.5.6",
+        tailwindcss: "^3.4.19",
       };
       // Add biome scripts
       pkg.scripts = {

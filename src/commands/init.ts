@@ -18,7 +18,6 @@ function runInteractive(
   return new Promise((resolve, reject) => {
     const proc = spawn(cmd, args, {
       stdio: "inherit",
-      shell: true,
       cwd,
     });
     proc.on("close", (code) => {

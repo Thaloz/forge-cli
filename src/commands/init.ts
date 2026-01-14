@@ -32,6 +32,13 @@ function runInteractive(
   });
 }
 
+/**
+ * Strip comments from JSON (for tsconfig.json which allows comments)
+ */
+function stripJsonComments(str: string): string {
+  return str.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, "");
+}
+
 export default defineCommand({
   meta: {
     name: "init",
@@ -102,7 +109,8 @@ export default defineCommand({
 
     // Add path aliases to tsconfig.json
     const tsconfigPath = join(projectDir, "tsconfig.json");
-    const tsconfig = JSON.parse(await readFile(tsconfigPath));
+    const tsconfigContent = await readFile(tsconfigPath);
+    const tsconfig = JSON.parse(stripJsonComments(tsconfigContent));
     tsconfig.compilerOptions = {
       ...tsconfig.compilerOptions,
       paths: {

@@ -67,10 +67,14 @@ export default defineCommand({
     logger.blank();
 
     // Step 1: Run TanStack Start scaffolding
-    logger.log(`  ${pc.cyan("Step 1/5:")} TanStack Start setup`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
+    logger.log(`  ${pc.cyan("Step 1/5:")} TanStack Start`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
     logger.blank();
     try {
       await runInteractive("pnpm", ["create", "@tanstack/start@latest", name]);
+      logger.blank();
+      logger.success("TanStack Start scaffolding complete");
     } catch {
       logger.error("TanStack Start scaffolding failed");
       process.exit(1);
@@ -78,7 +82,11 @@ export default defineCommand({
 
     // Step 2: Add forge customizations
     logger.blank();
-    const step2 = logger.step(`${pc.cyan("Step 2/5:")} Adding Forge customizations...`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
+    logger.log(`  ${pc.cyan("Step 2/5:")} Forge Customizations`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
+    logger.blank();
+    const step2 = logger.step("Adding customizations...");
 
     try {
       // Add dependencies to package.json
@@ -92,10 +100,9 @@ export default defineCommand({
       };
       pkg.devDependencies = {
         ...pkg.devDependencies,
-        "@biomejs/biome": "^1.9.4",
-        autoprefixer: "^10.4.23",
-        postcss: "^8.5.6",
-        tailwindcss: "^3.4.19",
+        "@biomejs/biome": "^2.3.11",
+        "@tailwindcss/vite": "^4.1.18",
+        tailwindcss: "^4.1.18",
       };
       // Add biome scripts
       pkg.scripts = {
@@ -125,8 +132,6 @@ export default defineCommand({
       // Write forge-specific files
       const forgeFiles = [
         { templatePath: "init/biome.json.hbs", destPath: join(projectDir, "biome.json") },
-        { templatePath: "init/tailwind.config.ts.hbs", destPath: join(projectDir, "tailwind.config.ts") },
-        { templatePath: "init/postcss.config.js.hbs", destPath: join(projectDir, "postcss.config.js") },
         { templatePath: "init/convex/schema.ts.hbs", destPath: join(projectDir, "convex/schema.ts") },
         { templatePath: "init/src/lib/cn.ts.hbs", destPath: join(projectDir, "src/lib/cn.ts") },
         { templatePath: "init/src/providers/index.tsx.hbs", destPath: join(projectDir, "src/providers/index.tsx") },
@@ -171,12 +176,28 @@ export default defineCommand({
         await writeFile(join(dir, ".gitkeep"), "");
       }
 
-      // Create styles.css with Tailwind directives
+      // Create styles.css with Tailwind v4 import
       const stylesPath = join(projectDir, "src/styles.css");
       const existingStyles = await fileExists(stylesPath) ? await readFile(stylesPath) : "";
-      if (!existingStyles.includes("@tailwind")) {
-        const tailwindDirectives = `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n`;
-        await writeFile(stylesPath, tailwindDirectives + existingStyles);
+      if (!existingStyles.includes("@import") && !existingStyles.includes("@tailwind")) {
+        const tailwindImport = `@import "tailwindcss";\n\n`;
+        await writeFile(stylesPath, tailwindImport + existingStyles);
+      }
+
+      // Add Tailwind Vite plugin to vite.config.ts
+      const viteConfigPath = join(projectDir, "vite.config.ts");
+      if (await fileExists(viteConfigPath)) {
+        let viteConfig = await readFile(viteConfigPath);
+        if (!viteConfig.includes("@tailwindcss/vite")) {
+          // Add import at the top
+          viteConfig = `import tailwindcss from "@tailwindcss/vite";\n${viteConfig}`;
+          // Add to plugins array
+          viteConfig = viteConfig.replace(
+            /plugins:\s*\[/,
+            "plugins: [tailwindcss(), "
+          );
+          await writeFile(viteConfigPath, viteConfig);
+        }
       }
 
       // Update .gitignore
@@ -193,18 +214,22 @@ export default defineCommand({
       // Create .env.example
       await writeFile(join(projectDir, ".env.example"), "VITE_CONVEX_URL=\n");
 
-      step2.succeed(`${pc.cyan("Step 2/5:")} Forge customizations added`);
+      step2.succeed("Forge customizations added");
     } catch (err) {
-      step2.fail(`${pc.cyan("Step 2/5:")} Failed to add customizations`);
+      step2.fail("Failed to add customizations");
       throw err;
     }
 
     // Step 3: Install dependencies
     logger.blank();
-    logger.log(`  ${pc.cyan("Step 3/5:")} Installing dependencies...`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
+    logger.log(`  ${pc.cyan("Step 3/5:")} Dependencies`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
     logger.blank();
     try {
       await runInteractive("pnpm", ["install"], projectDir);
+      logger.blank();
+      logger.success("Dependencies installed");
     } catch {
       logger.error("Failed to install dependencies");
       process.exit(1);
@@ -212,32 +237,45 @@ export default defineCommand({
 
     // Step 4: Convex setup
     logger.blank();
-    logger.log(`  ${pc.cyan("Step 4/5:")} Convex setup`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
+    logger.log(`  ${pc.cyan("Step 4/5:")} Convex`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
     logger.blank();
     try {
       await runInteractive("npx", ["convex", "dev", "--once", "--configure=new"], projectDir);
+      logger.blank();
+      logger.success("Convex configured");
     } catch {
-      logger.warn("Convex setup skipped or failed - you can run it later");
+      logger.blank();
+      logger.warn("Convex setup skipped - run 'npx convex dev' later");
     }
 
     // Step 5: shadcn setup
     logger.blank();
-    logger.log(`  ${pc.cyan("Step 5/5:")} shadcn/ui setup`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
+    logger.log(`  ${pc.cyan("Step 5/5:")} shadcn/ui`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
     logger.blank();
     try {
       await runInteractive("pnpm", ["dlx", "shadcn@latest", "init"], projectDir);
+      logger.blank();
+      logger.success("shadcn/ui configured");
     } catch {
-      logger.warn("shadcn setup skipped or failed - you can run it later");
+      logger.blank();
+      logger.warn("shadcn setup skipped - run 'pnpm dlx shadcn init' later");
     }
 
     // Done!
     logger.blank();
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
     logger.log(`  ${pc.green("✓")} ${pc.bold("Project created successfully!")}`);
+    logger.log(`  ${pc.dim("─".repeat(50))}`);
     logger.blank();
-    logger.log(`  ${pc.cyan("cd")} ${name}`);
-    logger.log(`  ${pc.cyan("pnpm dev")}`);
+    logger.log(`  ${pc.dim("Next steps:")}`);
+    logger.log(`  ${pc.cyan("$")} cd ${name}`);
+    logger.log(`  ${pc.cyan("$")} pnpm dev`);
     logger.blank();
-    logger.log(`  ${pc.dim("CLAUDE.md is configured. Claude Code will use forge CLI automatically.")}`);
+    logger.log(`  ${pc.dim("CLAUDE.md configured for Claude Code.")}`);
     logger.blank();
   },
 });

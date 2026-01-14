@@ -1,117 +1,51 @@
 # CLAUDE.md
 
-## YOU MUST USE FORGE CLI
+## Stack
+TanStack Start + Convex + Tailwind v4 + shadcn/ui + Biome
 
-When the user asks you to build ANY feature, you MUST:
+## IMPORTANT: Use Forge CLI for Features
 
-1. FIRST run `forge add:feature <name>`
-2. THEN fill in the generated files
-3. NEVER create feature files manually
-
-## Trigger Words → Action
-
-| User says | You run |
-|-----------|---------|
-| "add feature", "create feature", "build feature" | `forge add:feature <name>` |
-| "add X with Y" (any domain entity) | `forge add:feature <name>` |
-| "new page for X" | `forge add:feature <name>` |
-| "build X functionality" | `forge add:feature <name>` |
-
-## What forge add:feature Creates
-
-Running `forge add:feature pets` creates:
-
-```
-src/features/pets/
-├── components/index.ts
-├── hooks.ts
-└── index.ts
-
-convex/features/pets/
-├── schema.ts
-├── queries.ts
-├── mutations.ts
-└── index.ts
-
-src/routes/pets/
-├── index.tsx      (list page)
-└── $id.tsx        (detail page)
-```
-
-You then EDIT these scaffolded files - never create them from scratch.
-
-## File Creation Rules
-
-DO NOT create these files manually - forge creates them:
-- `src/features/**/*` (all feature frontend code)
-- `convex/features/**/*` (all feature backend code)
-- `src/routes/<feature>/**/*` (route files for features)
-
-The ONLY route file you may edit directly is `src/routes/index.tsx` (homepage).
-For any feature route, run `forge add:feature <name>` first, then edit the scaffolded files.
-
-## What You CAN Create Manually
-
-- Files inside existing feature component folders (after forge created them)
-- `src/components/*` (shared UI)
-- `src/lib/*` (utilities)
-- `src/hooks/*` (global hooks)
-
-## Workflow Example
-
-User: "Add a comments feature with replies"
-
-You MUST:
-```
-Run: forge add:feature comments
-Edit: convex/features/comments/schema.ts (add fields for comments + replies)
-Edit: convex/features/comments/queries.ts (add queries)
-Edit: convex/features/comments/mutations.ts (add mutations)
-Edit: src/features/comments/hooks.ts (add/modify hooks)
-Create: src/features/comments/components/CommentCard.tsx
-Create: src/features/comments/components/CommentList.tsx
-Create: src/features/comments/components/ReplyForm.tsx
-Update: src/features/comments/components/index.ts (add exports)
-Edit: src/routes/comments/index.tsx (wire up components)
-```
-
-## Validation
-
-Before finishing ANY task, run:
+BEFORE building any feature, YOU MUST run:
 ```bash
-forge check
+forge add:feature <name>
 ```
-If it fails, fix ALL issues before responding to the user.
 
-## Project Structure
+This scaffolds the complete vertical slice:
+- `src/features/<name>/` (components, hooks)
+- `convex/features/<name>/` (schema, queries, mutations)
+- `src/routes/<name>/` (route pages)
+
+NEVER create these paths manually. Edit the scaffolded files instead.
+
+The ONLY route you may create directly is `src/routes/index.tsx` (homepage).
+
+## Commands
+
+```bash
+pnpm dev              # Start dev server
+npx convex dev        # Start Convex backend
+pnpm lint             # Check with Biome
+forge check           # Validate architecture (run before finishing)
+```
+
+## Architecture
 
 ```
-src/routes/         → Thin route files only (import from features, no logic)
-src/features/       → All feature code (components, hooks, types)
-src/components/     → Shared UI only (used across features)
-src/lib/            → Pure utilities
-convex/features/    → Backend mirrors frontend features
+src/routes/         → Thin route files (import from features, no logic)
+src/features/       → Feature code (components/, hooks.ts)
+src/components/     → Shared UI only
+src/lib/            → Utilities
+convex/features/    → Backend (mirrors src/features/)
 ```
 
 ## Rules
 
-1. **Routes are thin**: Only import and render. No business logic. No hooks defined here.
-2. **No cross-feature imports**: `src/features/X` cannot import from `src/features/Y`
-3. **Hooks in hooks.ts**: All feature hooks in `src/features/<name>/hooks.ts`
-4. **Components in components/**: All feature components in `src/features/<name>/components/`
-5. **Mirror structure**: Every `src/features/X` has `convex/features/X`
+1. Routes are thin wrappers - no business logic, just imports and renders
+2. No cross-feature imports (`src/features/X` cannot import from `src/features/Y`)
+3. Each `src/features/X` has matching `convex/features/X`
 
-## Stack Quick Reference
+## Quick Reference
 
-- **Data fetching**: Use hooks from `src/features/<name>/hooks.ts` (they wrap Convex)
-- **Mutations**: Use mutation hooks from `src/features/<name>/hooks.ts`
-- **UI primitives**: Import from `~/components/ui/*` (shadcn)
-- **Styling**: Tailwind classes only, no CSS files
-- **Forms**: react-hook-form + zod for validation
-
-## Commands Reference
-
-| Command | When to use |
-|---------|-------------|
-| `forge add:feature <name>` | BEFORE building any new feature |
-| `forge check` | BEFORE completing any task |
+- **Data/Mutations**: Use hooks from `src/features/<name>/hooks.ts`
+- **UI Components**: Import from `~/components/ui/*` (shadcn)
+- **Styling**: Tailwind classes only

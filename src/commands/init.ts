@@ -53,8 +53,6 @@ export default defineCommand({
 
       // Src files
       { templatePath: "init/src/router.tsx.hbs", destPath: join(projectDir, "src/router.tsx") },
-      { templatePath: "init/src/client.tsx.hbs", destPath: join(projectDir, "src/client.tsx") },
-      { templatePath: "init/src/server.tsx.hbs", destPath: join(projectDir, "src/server.tsx") },
       { templatePath: "init/src/routes/__root.tsx.hbs", destPath: join(projectDir, "src/routes/__root.tsx") },
       { templatePath: "init/src/routes/index.tsx.hbs", destPath: join(projectDir, "src/routes/index.tsx") },
       { templatePath: "init/src/lib/cn.ts.hbs", destPath: join(projectDir, "src/lib/cn.ts") },

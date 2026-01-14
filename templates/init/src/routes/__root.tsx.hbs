@@ -1,7 +1,6 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { Meta, Scripts } from "@tanstack/react-start";
+import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import { Providers } from "../providers";
-import "../styles.css";
+import appCss from "../styles.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -10,6 +9,7 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "{{name}}" },
     ],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
   component: RootComponent,
 });
@@ -26,7 +26,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <Meta />
+        <HeadContent />
       </head>
       <body>
         <Providers>{children}</Providers>

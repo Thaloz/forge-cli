@@ -80,11 +80,11 @@ export default defineCommand({
       // Route files
       {
         templatePath: "feature/routes/index.tsx.hbs",
-        destPath: join(cwd, "app/routes", name, "index.tsx"),
+        destPath: join(cwd, "src/routes", name, "index.tsx"),
       },
       {
         templatePath: "feature/routes/$id.tsx.hbs",
-        destPath: join(cwd, "app/routes", name, "$id.tsx"),
+        destPath: join(cwd, "src/routes", name, "$id.tsx"),
       },
     ];
 

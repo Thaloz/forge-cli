@@ -17,14 +17,38 @@ When the user asks you to build ANY feature, you MUST:
 | "new page for X" | `forge add:feature <name>` |
 | "build X functionality" | `forge add:feature <name>` |
 
+## What forge add:feature Creates
+
+Running `forge add:feature pets` creates:
+
+```
+src/features/pets/
+├── components/index.ts
+├── hooks.ts
+└── index.ts
+
+convex/features/pets/
+├── schema.ts
+├── queries.ts
+├── mutations.ts
+└── index.ts
+
+src/routes/pets/
+├── index.tsx      (list page)
+└── $id.tsx        (detail page)
+```
+
+You then EDIT these scaffolded files - never create them from scratch.
+
 ## File Creation Rules
 
-DO NOT create these files manually:
-- `src/features/**/*` (forge creates the structure)
-- `convex/features/**/*` (forge creates the structure)
-- `app/routes/<feature>/**/*` (forge creates the structure)
+DO NOT create these files manually - forge creates them:
+- `src/features/**/*` (all feature frontend code)
+- `convex/features/**/*` (all feature backend code)
+- `src/routes/<feature>/**/*` (route files for features)
 
-ONLY the forge CLI creates these. You fill them in after.
+The ONLY route file you may edit directly is `src/routes/index.tsx` (homepage).
+For any feature route, run `forge add:feature <name>` first, then edit the scaffolded files.
 
 ## What You CAN Create Manually
 
@@ -48,7 +72,7 @@ Create: src/features/comments/components/CommentCard.tsx
 Create: src/features/comments/components/CommentList.tsx
 Create: src/features/comments/components/ReplyForm.tsx
 Update: src/features/comments/components/index.ts (add exports)
-Edit: app/routes/comments/index.tsx (wire up components)
+Edit: src/routes/comments/index.tsx (wire up components)
 ```
 
 ## Validation
@@ -62,7 +86,7 @@ If it fails, fix ALL issues before responding to the user.
 ## Project Structure
 
 ```
-app/routes/         → Thin route files only (import from features, no logic)
+src/routes/         → Thin route files only (import from features, no logic)
 src/features/       → All feature code (components, hooks, types)
 src/components/     → Shared UI only (used across features)
 src/lib/            → Pure utilities

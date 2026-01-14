@@ -9,12 +9,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    {/* [forge:providers-open] */}
     <ConvexProvider client={convex}>
-      {/* [/forge:providers-open] */}
       {children}
-      {/* [forge:providers-close] */}
     </ConvexProvider>
-    {/* [/forge:providers-close] */}
   );
 }

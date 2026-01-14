@@ -4,7 +4,7 @@ import { join } from "path";
 import { logger } from "../utils/logger.js";
 import { renderTemplate } from "../utils/template.js";
 import { writeFile, fileExists, readFile } from "../utils/fs.js";
-import { insertAtMarker, replaceAtMarker } from "../utils/markers.js";
+import { insertAtMarker } from "../utils/markers.js";
 import pc from "picocolors";
 
 const INTEGRATIONS = ["auth", "storage"] as const;
@@ -226,7 +226,7 @@ async function updateProvidersForAuth(cwd: string): Promise<void> {
     return; // Already configured
   }
 
-  // Add auth provider import
+  // Add auth provider import at marker
   const importLine = 'import { ConvexAuthProvider } from "@convex-dev/auth/react";';
   const importResult = insertAtMarker(content, "imports", importLine, "ts");
   if (!importResult.success) {
@@ -235,37 +235,13 @@ async function updateProvidersForAuth(cwd: string): Promise<void> {
   }
   content = importResult.content;
 
-  // Replace provider open tag
-  const openResult = replaceAtMarker(
-    content,
-    "providers-open",
-    "    <ConvexAuthProvider client={convex}>",
-    "jsx"
-  );
-  if (!openResult.success) {
-    logger.warn("Provider markers not found - please update providers manually");
-    return;
-  }
-  content = openResult.content;
-
-  // Replace provider close tag
-  const closeResult = replaceAtMarker(
-    content,
-    "providers-close",
-    "    </ConvexAuthProvider>",
-    "jsx"
-  );
-  if (!closeResult.success) {
-    logger.warn("Provider close markers not found - please update providers manually");
-    return;
-  }
-  content = closeResult.content;
-
-  // Update the ConvexProvider import to just ConvexReactClient
+  // Replace ConvexProvider with ConvexAuthProvider (string replacement)
   content = content.replace(
     'import { ConvexProvider, ConvexReactClient } from "convex/react";',
     'import { ConvexReactClient } from "convex/react";'
   );
+  content = content.replace(/<ConvexProvider/g, "<ConvexAuthProvider");
+  content = content.replace(/<\/ConvexProvider>/g, "</ConvexAuthProvider>");
 
   await writeFile(providersPath, content);
 }

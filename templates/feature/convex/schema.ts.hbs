@@ -1,0 +1,10 @@
+import { defineTable } from "convex/server";
+import { v } from "convex/values";
+
+export const {{camelCase name}}Tables = {
+  {{camelCase name}}: defineTable({
+    // Define your fields here
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_created", ["createdAt"]),
+};

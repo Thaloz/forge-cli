@@ -1,0 +1,21 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { use{{pascalCase name}}List } from "~/features/{{camelCase name}}";
+
+export const Route = createFileRoute("/{{kebabCase name}}/")({
+  component: {{pascalCase name}}IndexRoute,
+});
+
+function {{pascalCase name}}IndexRoute() {
+  const { items, isLoading } = use{{pascalCase name}}List();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <h1>{{pascalCase name}}</h1>
+      {/* Build your UI here */}
+    </div>
+  );
+}

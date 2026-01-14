@@ -1,0 +1,93 @@
+# CLAUDE.md
+
+## YOU MUST USE FORGE CLI
+
+When the user asks you to build ANY feature, you MUST:
+
+1. FIRST run `forge add:feature <name>`
+2. THEN fill in the generated files
+3. NEVER create feature files manually
+
+## Trigger Words → Action
+
+| User says | You run |
+|-----------|---------|
+| "add feature", "create feature", "build feature" | `forge add:feature <name>` |
+| "add X with Y" (any domain entity) | `forge add:feature <name>` |
+| "new page for X" | `forge add:feature <name>` |
+| "build X functionality" | `forge add:feature <name>` |
+
+## File Creation Rules
+
+DO NOT create these files manually:
+- `src/features/**/*` (forge creates the structure)
+- `convex/features/**/*` (forge creates the structure)
+- `app/routes/<feature>/**/*` (forge creates the structure)
+
+ONLY the forge CLI creates these. You fill them in after.
+
+## What You CAN Create Manually
+
+- Files inside existing feature component folders (after forge created them)
+- `src/components/*` (shared UI)
+- `src/lib/*` (utilities)
+- `src/hooks/*` (global hooks)
+
+## Workflow Example
+
+User: "Add a comments feature with replies"
+
+You MUST:
+```
+Run: forge add:feature comments
+Edit: convex/features/comments/schema.ts (add fields for comments + replies)
+Edit: convex/features/comments/queries.ts (add queries)
+Edit: convex/features/comments/mutations.ts (add mutations)
+Edit: src/features/comments/hooks.ts (add/modify hooks)
+Create: src/features/comments/components/CommentCard.tsx
+Create: src/features/comments/components/CommentList.tsx
+Create: src/features/comments/components/ReplyForm.tsx
+Update: src/features/comments/components/index.ts (add exports)
+Edit: app/routes/comments/index.tsx (wire up components)
+```
+
+## Validation
+
+Before finishing ANY task, run:
+```bash
+forge check
+```
+If it fails, fix ALL issues before responding to the user.
+
+## Project Structure
+
+```
+app/routes/         → Thin route files only (import from features, no logic)
+src/features/       → All feature code (components, hooks, types)
+src/components/     → Shared UI only (used across features)
+src/lib/            → Pure utilities
+convex/features/    → Backend mirrors frontend features
+```
+
+## Rules
+
+1. **Routes are thin**: Only import and render. No business logic. No hooks defined here.
+2. **No cross-feature imports**: `src/features/X` cannot import from `src/features/Y`
+3. **Hooks in hooks.ts**: All feature hooks in `src/features/<name>/hooks.ts`
+4. **Components in components/**: All feature components in `src/features/<name>/components/`
+5. **Mirror structure**: Every `src/features/X` has `convex/features/X`
+
+## Stack Quick Reference
+
+- **Data fetching**: Use hooks from `src/features/<name>/hooks.ts` (they wrap Convex)
+- **Mutations**: Use mutation hooks from `src/features/<name>/hooks.ts`
+- **UI primitives**: Import from `~/components/ui/*` (shadcn)
+- **Styling**: Tailwind classes only, no CSS files
+- **Forms**: react-hook-form + zod for validation
+
+## Commands Reference
+
+| Command | When to use |
+|---------|-------------|
+| `forge add:feature <name>` | BEFORE building any new feature |
+| `forge check` | BEFORE completing any task |

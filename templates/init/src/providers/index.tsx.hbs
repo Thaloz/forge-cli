@@ -1,0 +1,10 @@
+import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { useState } from "react";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [convex] = useState(
+    () => new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
+  );
+
+  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
+}

@@ -1,0 +1,29 @@
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+
+export function use{{pascalCase name}}List() {
+  const items = useQuery(api.features.{{camelCase name}}.queries.list);
+
+  return {
+    items: items ?? [],
+    isLoading: items === undefined,
+  };
+}
+
+export function use{{pascalCase name}}(id: Id<"{{camelCase name}}">) {
+  const item = useQuery(api.features.{{camelCase name}}.queries.getById, { id });
+
+  return {
+    item,
+    isLoading: item === undefined,
+  };
+}
+
+export function use{{pascalCase name}}Mutations() {
+  const create = useMutation(api.features.{{camelCase name}}.mutations.create);
+  const update = useMutation(api.features.{{camelCase name}}.mutations.update);
+  const remove = useMutation(api.features.{{camelCase name}}.mutations.remove);
+
+  return { create, update, remove };
+}

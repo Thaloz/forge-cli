@@ -1,0 +1,27 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { use{{pascalCase name}} } from "~/features/{{camelCase name}}";
+import type { Id } from "@convex/_generated/dataModel";
+
+export const Route = createFileRoute("/{{kebabCase name}}/$id")({
+  component: {{pascalCase name}}DetailRoute,
+});
+
+function {{pascalCase name}}DetailRoute() {
+  const { id } = Route.useParams();
+  const { item, isLoading } = use{{pascalCase name}}(id as Id<"{{camelCase name}}">);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!item) {
+    return <div>Not found</div>;
+  }
+
+  return (
+    <div>
+      <h1>{{pascalCase name}} Detail</h1>
+      {/* Build your UI here */}
+    </div>
+  );
+}

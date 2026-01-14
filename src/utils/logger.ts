@@ -1,5 +1,6 @@
 import { consola } from "consola";
 import pc from "picocolors";
+import ora, { type Ora } from "ora";
 
 export const logger = {
   success(msg: string) {
@@ -24,5 +25,15 @@ export const logger = {
 
   blank() {
     consola.log("");
+  },
+
+  /**
+   * Create a spinner for a step. Call .succeed() or .fail() when done.
+   */
+  step(msg: string): Ora {
+    return ora({
+      text: msg,
+      prefixText: " ",
+    }).start();
   },
 };

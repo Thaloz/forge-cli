@@ -78,128 +78,126 @@ export default defineCommand({
 
     // Step 2: Add forge customizations
     logger.blank();
-    logger.log(`  ${pc.cyan("Step 2/5:")} Adding Forge customizations...`);
+    const step2 = logger.step(`${pc.cyan("Step 2/5:")} Adding Forge customizations...`);
 
-    // Add dependencies to package.json
-    const pkgPath = join(projectDir, "package.json");
-    const pkg = JSON.parse(await readFile(pkgPath));
-    pkg.dependencies = {
-      ...pkg.dependencies,
-      convex: "^1.31.4",
-      clsx: "^2.1.1",
-      "tailwind-merge": "^3.4.0",
-    };
-    pkg.devDependencies = {
-      ...pkg.devDependencies,
-      "@biomejs/biome": "^1.9.4",
-      autoprefixer: "^10.4.20",
-      postcss: "^8.5.0",
-      tailwindcss: "^3.4.17",
-    };
-    // Add biome scripts
-    pkg.scripts = {
-      ...pkg.scripts,
-      lint: "biome check .",
-      "lint:fix": "biome check . --write",
-      format: "biome format . --write",
-    };
-    await writeFile(pkgPath, JSON.stringify(pkg, null, 2));
-    logger.success("Updated package.json with Convex & Tailwind deps");
+    try {
+      // Add dependencies to package.json
+      const pkgPath = join(projectDir, "package.json");
+      const pkg = JSON.parse(await readFile(pkgPath));
+      pkg.dependencies = {
+        ...pkg.dependencies,
+        convex: "^1.31.4",
+        clsx: "^2.1.1",
+        "tailwind-merge": "^3.4.0",
+      };
+      pkg.devDependencies = {
+        ...pkg.devDependencies,
+        "@biomejs/biome": "^1.9.4",
+        autoprefixer: "^10.4.20",
+        postcss: "^8.5.0",
+        tailwindcss: "^3.4.17",
+      };
+      // Add biome scripts
+      pkg.scripts = {
+        ...pkg.scripts,
+        lint: "biome check .",
+        "lint:fix": "biome check . --write",
+        format: "biome format . --write",
+      };
+      await writeFile(pkgPath, JSON.stringify(pkg, null, 2));
 
-    // Add path aliases to tsconfig.json
-    const tsconfigPath = join(projectDir, "tsconfig.json");
-    const tsconfigContent = await readFile(tsconfigPath);
-    const tsconfig = JSON.parse(stripJsonComments(tsconfigContent));
-    tsconfig.compilerOptions = {
-      ...tsconfig.compilerOptions,
-      paths: {
-        ...tsconfig.compilerOptions?.paths,
-        "~/*": ["./src/*"],
-        "@convex/*": ["./convex/*"],
-      },
-    };
-    await writeFile(tsconfigPath, JSON.stringify(tsconfig, null, 2));
-    logger.success("Added path aliases to tsconfig.json");
+      // Add path aliases to tsconfig.json
+      const tsconfigPath = join(projectDir, "tsconfig.json");
+      const tsconfigContent = await readFile(tsconfigPath);
+      const tsconfig = JSON.parse(stripJsonComments(tsconfigContent));
+      tsconfig.compilerOptions = {
+        ...tsconfig.compilerOptions,
+        paths: {
+          ...tsconfig.compilerOptions?.paths,
+          "~/*": ["./src/*"],
+          "@convex/*": ["./convex/*"],
+        },
+      };
+      await writeFile(tsconfigPath, JSON.stringify(tsconfig, null, 2));
 
-    const templateData = { name };
+      const templateData = { name };
 
-    // Write forge-specific files
-    const forgeFiles = [
-      { templatePath: "init/biome.json.hbs", destPath: join(projectDir, "biome.json") },
-      { templatePath: "init/tailwind.config.ts.hbs", destPath: join(projectDir, "tailwind.config.ts") },
-      { templatePath: "init/postcss.config.js.hbs", destPath: join(projectDir, "postcss.config.js") },
-      { templatePath: "init/convex/schema.ts.hbs", destPath: join(projectDir, "convex/schema.ts") },
-      { templatePath: "init/src/lib/cn.ts.hbs", destPath: join(projectDir, "src/lib/cn.ts") },
-      { templatePath: "init/src/providers/index.tsx.hbs", destPath: join(projectDir, "src/providers/index.tsx") },
-      { templatePath: "init/claude.md.hbs", destPath: join(projectDir, "CLAUDE.md") },
-    ];
+      // Write forge-specific files
+      const forgeFiles = [
+        { templatePath: "init/biome.json.hbs", destPath: join(projectDir, "biome.json") },
+        { templatePath: "init/tailwind.config.ts.hbs", destPath: join(projectDir, "tailwind.config.ts") },
+        { templatePath: "init/postcss.config.js.hbs", destPath: join(projectDir, "postcss.config.js") },
+        { templatePath: "init/convex/schema.ts.hbs", destPath: join(projectDir, "convex/schema.ts") },
+        { templatePath: "init/src/lib/cn.ts.hbs", destPath: join(projectDir, "src/lib/cn.ts") },
+        { templatePath: "init/src/providers/index.tsx.hbs", destPath: join(projectDir, "src/providers/index.tsx") },
+        { templatePath: "init/claude.md.hbs", destPath: join(projectDir, "CLAUDE.md") },
+      ];
 
-    for (const file of forgeFiles) {
-      const content = renderTemplate(file.templatePath, templateData);
-      await writeFile(file.destPath, content);
-      const relativePath = file.destPath.replace(projectDir + "/", "");
-      logger.success(`Created ${relativePath}`);
-    }
-
-    // Modify __root.tsx to add Providers
-    const rootPath = join(projectDir, "src/routes/__root.tsx");
-    if (await fileExists(rootPath)) {
-      let rootContent = await readFile(rootPath);
-
-      // Add Providers import
-      if (!rootContent.includes("Providers")) {
-        rootContent = `import { Providers } from "../providers";\n${rootContent}`;
-
-        // Wrap body children with Providers
-        // Look for pattern like: <body>...{children}...</body> or similar
-        rootContent = rootContent.replace(
-          /(<body[^>]*>)([\s\S]*?)(<\/body>)/,
-          "$1<Providers>$2</Providers>$3"
-        );
-
-        await writeFile(rootPath, rootContent);
-        logger.success("Modified __root.tsx to use Providers");
+      for (const file of forgeFiles) {
+        const content = renderTemplate(file.templatePath, templateData);
+        await writeFile(file.destPath, content);
       }
-    }
 
-    // Create directory structure
-    const emptyDirs = [
-      join(projectDir, "src/components/ui"),
-      join(projectDir, "src/features"),
-      join(projectDir, "src/hooks"),
-      join(projectDir, "convex/features"),
-    ];
+      // Modify __root.tsx to add Providers
+      const rootPath = join(projectDir, "src/routes/__root.tsx");
+      if (await fileExists(rootPath)) {
+        let rootContent = await readFile(rootPath);
 
-    for (const dir of emptyDirs) {
-      await ensureDir(dir);
-      await writeFile(join(dir, ".gitkeep"), "");
-    }
-    logger.success("Created directory structure");
+        // Add Providers import
+        if (!rootContent.includes("Providers")) {
+          rootContent = `import { Providers } from "../providers";\n${rootContent}`;
 
-    // Create styles.css with Tailwind directives
-    const stylesPath = join(projectDir, "src/styles.css");
-    const existingStyles = await fileExists(stylesPath) ? await readFile(stylesPath) : "";
-    if (!existingStyles.includes("@tailwind")) {
-      const tailwindDirectives = `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n`;
-      await writeFile(stylesPath, tailwindDirectives + existingStyles);
-      logger.success("Added Tailwind directives to styles.css");
-    }
+          // Wrap body children with Providers
+          // Look for pattern like: <body>...{children}...</body> or similar
+          rootContent = rootContent.replace(
+            /(<body[^>]*>)([\s\S]*?)(<\/body>)/,
+            "$1<Providers>$2</Providers>$3"
+          );
 
-    // Update .gitignore
-    const gitignorePath = join(projectDir, ".gitignore");
-    let gitignore = await fileExists(gitignorePath) ? await readFile(gitignorePath) : "";
-    const additions = [".env", ".env.local", ".output", "convex/_generated"];
-    for (const item of additions) {
-      if (!gitignore.includes(item)) {
-        gitignore += `\n${item}`;
+          await writeFile(rootPath, rootContent);
+        }
       }
-    }
-    await writeFile(gitignorePath, gitignore.trim() + "\n");
-    logger.success("Updated .gitignore");
 
-    // Create .env.example
-    await writeFile(join(projectDir, ".env.example"), "VITE_CONVEX_URL=\n");
-    logger.success("Created .env.example");
+      // Create directory structure
+      const emptyDirs = [
+        join(projectDir, "src/components/ui"),
+        join(projectDir, "src/features"),
+        join(projectDir, "src/hooks"),
+        join(projectDir, "convex/features"),
+      ];
+
+      for (const dir of emptyDirs) {
+        await ensureDir(dir);
+        await writeFile(join(dir, ".gitkeep"), "");
+      }
+
+      // Create styles.css with Tailwind directives
+      const stylesPath = join(projectDir, "src/styles.css");
+      const existingStyles = await fileExists(stylesPath) ? await readFile(stylesPath) : "";
+      if (!existingStyles.includes("@tailwind")) {
+        const tailwindDirectives = `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n`;
+        await writeFile(stylesPath, tailwindDirectives + existingStyles);
+      }
+
+      // Update .gitignore
+      const gitignorePath = join(projectDir, ".gitignore");
+      let gitignore = await fileExists(gitignorePath) ? await readFile(gitignorePath) : "";
+      const additions = [".env", ".env.local", ".output", "convex/_generated"];
+      for (const item of additions) {
+        if (!gitignore.includes(item)) {
+          gitignore += `\n${item}`;
+        }
+      }
+      await writeFile(gitignorePath, gitignore.trim() + "\n");
+
+      // Create .env.example
+      await writeFile(join(projectDir, ".env.example"), "VITE_CONVEX_URL=\n");
+
+      step2.succeed(`${pc.cyan("Step 2/5:")} Forge customizations added`);
+    } catch (err) {
+      step2.fail(`${pc.cyan("Step 2/5:")} Failed to add customizations`);
+      throw err;
+    }
 
     // Step 3: Install dependencies
     logger.blank();

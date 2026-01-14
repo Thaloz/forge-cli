@@ -1,3 +1,5 @@
+// [forge:imports]
+// [/forge:imports]
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { useState } from "react";
 
@@ -6,5 +8,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
     () => new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string)
   );
 
-  return <ConvexProvider client={convex}>{children}</ConvexProvider>;
+  return (
+    {/* [forge:providers-open] */}
+    <ConvexProvider client={convex}>
+      {/* [/forge:providers-open] */}
+      {children}
+      {/* [forge:providers-close] */}
+    </ConvexProvider>
+    {/* [/forge:providers-close] */}
+  );
 }

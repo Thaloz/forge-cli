@@ -4,6 +4,7 @@ import { join } from "path";
 import { logger } from "../utils/logger.js";
 import { renderTemplate } from "../utils/template.js";
 import { writeFile, fileExists, readFile } from "../utils/fs.js";
+import { insertAtMarker, replaceAtMarker } from "../utils/markers.js";
 import pc from "picocolors";
 
 const INTEGRATIONS = ["auth", "storage"] as const;
@@ -186,19 +187,29 @@ async function updateSchemaForAuth(cwd: string): Promise<void> {
 
   let content = await readFile(schemaPath);
 
-  // Add authTables import
-  if (!content.includes("authTables")) {
-    const importLine = 'import { authTables } from "@convex-dev/auth/server";\n';
-    content = importLine + content;
+  const importLine = 'import { authTables } from "@convex-dev/auth/server";';
+  const spreadLine = "  ...authTables,";
 
-    // Add spread in defineSchema
-    content = content.replace(
-      /export default defineSchema\(\{/,
-      "export default defineSchema({\n  ...authTables,"
-    );
-
-    await writeFile(schemaPath, content);
+  // Insert import at marker
+  const importResult = insertAtMarker(content, "imports", importLine, "ts");
+  if (!importResult.success) {
+    logger.warn("Markers not found in schema.ts - please add auth import manually");
+    return;
   }
+  if (importResult.alreadyPresent) {
+    return; // Already configured
+  }
+  content = importResult.content;
+
+  // Insert table spread at marker
+  const tableResult = insertAtMarker(content, "tables", spreadLine, "ts");
+  if (!tableResult.success) {
+    logger.warn("Table markers not found in schema.ts - please add auth tables manually");
+    return;
+  }
+  content = tableResult.content;
+
+  await writeFile(schemaPath, content);
 }
 
 async function updateProvidersForAuth(cwd: string): Promise<void> {
@@ -210,15 +221,51 @@ async function updateProvidersForAuth(cwd: string): Promise<void> {
 
   let content = await readFile(providersPath);
 
-  // Replace ConvexProvider with ConvexAuthProvider
-  if (content.includes("ConvexProvider") && !content.includes("ConvexAuthProvider")) {
-    content = content.replace(
-      'import { ConvexProvider, ConvexReactClient } from "convex/react";',
-      'import { ConvexAuthProvider } from "@convex-dev/auth/react";\nimport { ConvexReactClient } from "convex/react";'
-    );
-    content = content.replace(/<ConvexProvider/g, "<ConvexAuthProvider");
-    content = content.replace(/<\/ConvexProvider>/g, "</ConvexAuthProvider>");
-
-    await writeFile(providersPath, content);
+  // Check if already configured
+  if (content.includes("ConvexAuthProvider")) {
+    return; // Already configured
   }
+
+  // Add auth provider import
+  const importLine = 'import { ConvexAuthProvider } from "@convex-dev/auth/react";';
+  const importResult = insertAtMarker(content, "imports", importLine, "ts");
+  if (!importResult.success) {
+    logger.warn("Import markers not found in providers - please add auth import manually");
+    return;
+  }
+  content = importResult.content;
+
+  // Replace provider open tag
+  const openResult = replaceAtMarker(
+    content,
+    "providers-open",
+    "    <ConvexAuthProvider client={convex}>",
+    "jsx"
+  );
+  if (!openResult.success) {
+    logger.warn("Provider markers not found - please update providers manually");
+    return;
+  }
+  content = openResult.content;
+
+  // Replace provider close tag
+  const closeResult = replaceAtMarker(
+    content,
+    "providers-close",
+    "    </ConvexAuthProvider>",
+    "jsx"
+  );
+  if (!closeResult.success) {
+    logger.warn("Provider close markers not found - please update providers manually");
+    return;
+  }
+  content = closeResult.content;
+
+  // Update the ConvexProvider import to just ConvexReactClient
+  content = content.replace(
+    'import { ConvexProvider, ConvexReactClient } from "convex/react";',
+    'import { ConvexReactClient } from "convex/react";'
+  );
+
+  await writeFile(providersPath, content);
 }

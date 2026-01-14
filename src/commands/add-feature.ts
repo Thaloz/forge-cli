@@ -4,6 +4,7 @@ import { logger } from "../utils/logger.js";
 import { renderTemplate } from "../utils/template.js";
 import { writeFile, fileExists, readFile } from "../utils/fs.js";
 import { kebabCase, camelCase } from "../utils/case.js";
+import { insertAtMarker } from "../utils/markers.js";
 
 interface FileToCreate {
   templatePath: string;
@@ -121,49 +122,30 @@ async function updateConvexSchema(cwd: string, featureName: string): Promise<voi
 
   let content = await readFile(schemaPath);
 
-  // Add import before "export default defineSchema"
   const importLine = `import { ${camelName}Tables } from "./features/${featureName}/schema";`;
-  const exportDefault = "export default defineSchema({";
+  const spreadLine = `  ...${camelName}Tables,`;
 
-  if (content.includes(importLine)) {
+  // Insert import at marker
+  const importResult = insertAtMarker(content, "imports", importLine, "ts");
+  if (!importResult.success) {
+    logger.warn("Markers not found in schema.ts - please add imports manually");
+    logger.warn(`  Add: ${importLine}`);
+    return;
+  }
+  if (importResult.alreadyPresent) {
     logger.warn("Schema import already exists - skipping");
     return;
   }
+  content = importResult.content;
 
-  // Find the position to insert the import
-  const exportPos = content.indexOf(exportDefault);
-  if (exportPos === -1) {
-    logger.warn("Could not find 'export default defineSchema({' in schema.ts - skipping");
+  // Insert table spread at marker
+  const tableResult = insertAtMarker(content, "tables", spreadLine, "ts");
+  if (!tableResult.success) {
+    logger.warn("Table markers not found in schema.ts - please add table spread manually");
+    logger.warn(`  Add: ${spreadLine}`);
     return;
   }
-
-  // Insert import before export
-  content = content.slice(0, exportPos) + importLine + "\n\n" + content.slice(exportPos);
-
-  // Add spread inside defineSchema
-  const spreadLine = `  ...${camelName}Tables,`;
-
-  // Find the closing of defineSchema - look for the pattern with }); at the end
-  // We need to insert before the closing });
-  const defineSchemaStart = content.indexOf(exportDefault);
-  const afterDefineSchema = content.slice(defineSchemaStart + exportDefault.length);
-
-  // Find the matching closing });
-  // Simple approach: find the last }); in the file
-  const closingIndex = content.lastIndexOf("});");
-
-  if (closingIndex === -1) {
-    logger.warn("Could not find closing '});' in schema.ts - skipping spread");
-    return;
-  }
-
-  // Check if spread already exists
-  if (content.includes(spreadLine)) {
-    logger.warn("Schema spread already exists - skipping");
-  } else {
-    // Insert spread before });
-    content = content.slice(0, closingIndex) + spreadLine + "\n" + content.slice(closingIndex);
-  }
+  content = tableResult.content;
 
   await writeFile(schemaPath, content);
   logger.success("Updated convex/schema.ts");

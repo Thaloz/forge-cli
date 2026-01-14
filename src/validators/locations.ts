@@ -16,7 +16,6 @@ export const componentLocationValidator: Validator = {
         "dist/**",
         ".vinxi/**",
         ".output/**",
-        "app/**", // Legacy TanStack Start routes
         "src/routes/**", // Route files (allowed JSX)
         "src/router.tsx", // Router config
         "src/features/*/components/**", // Valid location
@@ -63,7 +62,7 @@ export const hookLocationValidator: Validator = {
 
     for (const file of potentialHookFiles) {
       // Skip if it's inside routes (route files can have hooks inline)
-      if (file.startsWith("app/routes/") || file.startsWith("src/routes/")) continue;
+      if (file.startsWith("src/routes/")) continue;
 
       errors.push({
         file,

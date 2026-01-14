@@ -49,16 +49,14 @@ export default defineCommand({
       { templatePath: "init/biome.json.hbs", destPath: join(projectDir, "biome.json") },
       { templatePath: "init/tailwind.config.ts.hbs", destPath: join(projectDir, "tailwind.config.ts") },
       { templatePath: "init/postcss.config.js.hbs", destPath: join(projectDir, "postcss.config.js") },
-      { templatePath: "init/app.config.ts.hbs", destPath: join(projectDir, "app.config.ts") },
-
-      // App files
-      { templatePath: "init/app/client.tsx.hbs", destPath: join(projectDir, "app/client.tsx") },
-      { templatePath: "init/app/ssr.tsx.hbs", destPath: join(projectDir, "app/ssr.tsx") },
-      { templatePath: "init/app/router.tsx.hbs", destPath: join(projectDir, "app/router.tsx") },
-      { templatePath: "init/app/routes/__root.tsx.hbs", destPath: join(projectDir, "app/routes/__root.tsx") },
-      { templatePath: "init/app/routes/index.tsx.hbs", destPath: join(projectDir, "app/routes/index.tsx") },
+      { templatePath: "init/vite.config.ts.hbs", destPath: join(projectDir, "vite.config.ts") },
 
       // Src files
+      { templatePath: "init/src/router.tsx.hbs", destPath: join(projectDir, "src/router.tsx") },
+      { templatePath: "init/src/client.tsx.hbs", destPath: join(projectDir, "src/client.tsx") },
+      { templatePath: "init/src/server.tsx.hbs", destPath: join(projectDir, "src/server.tsx") },
+      { templatePath: "init/src/routes/__root.tsx.hbs", destPath: join(projectDir, "src/routes/__root.tsx") },
+      { templatePath: "init/src/routes/index.tsx.hbs", destPath: join(projectDir, "src/routes/index.tsx") },
       { templatePath: "init/src/lib/cn.ts.hbs", destPath: join(projectDir, "src/lib/cn.ts") },
       { templatePath: "init/src/providers/index.tsx.hbs", destPath: join(projectDir, "src/providers/index.tsx") },
 
@@ -102,7 +100,7 @@ export default defineCommand({
     // Create .gitignore
     const gitignore = `node_modules
 dist
-.vinxi
+.output
 .env
 .env.local
 `;
@@ -121,7 +119,7 @@ dist
     logger.log("  Next steps:");
     logger.log(`    1. ${pc.cyan(`cd ${name}`)}`);
     logger.log(`    2. ${pc.cyan("pnpm install")}`);
-    logger.log(`    3. ${pc.cyan("npx convex init")}`);
+    logger.log(`    3. ${pc.cyan("npx convex dev --once --configure=new")}`);
     logger.log(`    4. ${pc.cyan("pnpm dlx shadcn@latest init")}`);
     logger.log(`    5. ${pc.cyan("pnpm dev")}`);
     logger.blank();

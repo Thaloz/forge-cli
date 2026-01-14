@@ -32,7 +32,7 @@ Creates a complete project with:
 forge init my-app
 cd my-app
 pnpm install
-npx convex init
+npx convex dev --once --configure=new
 pnpm dlx shadcn@latest init
 pnpm dev
 ```

@@ -1,6 +1,6 @@
 {
-  "name": "forge-cli",
-  "version": "0.1.0",
+  "name": "ai-forge-cli",
+  "version": "0.1.4",
   "description": "TypeScript stack scaffolding & enforcement CLI for TanStack Start + Convex",
   "type": "module",
   "license": "MIT",
@@ -47,13 +47,13 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "^22.10.5",
+    "@types/node": "^25.0.8",
     "tsx": "^4.19.2",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

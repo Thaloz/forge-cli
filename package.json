@@ -1,6 +1,6 @@
 {
   "name": "ai-forge-cli",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "TypeScript stack scaffolding & enforcement CLI for TanStack Start + Convex",
   "type": "module",
   "license": "MIT",

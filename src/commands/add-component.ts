@@ -8,7 +8,8 @@ import { kebabCase, pascalCase } from "../utils/case.js";
 export default defineCommand({
   meta: {
     name: "add:component",
-    description: "Create a new React component",
+    description:
+      "Create a React component. Creates: <target>/<Name>.tsx, updates index.ts. Default: src/components/ui/. Use --feature, --page, or --layout to target specific folders.",
   },
   args: {
     name: {

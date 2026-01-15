@@ -8,7 +8,8 @@ import { kebabCase, camelCase } from "../utils/case.js";
 export default defineCommand({
   meta: {
     name: "add:hook",
-    description: "Create a new React hook",
+    description:
+      "Create a React hook. Without --feature: creates src/hooks/<useName>.ts. With --feature: appends to src/features/<name>/hooks.ts. Auto-prefixes 'use' if needed.",
   },
   args: {
     name: {

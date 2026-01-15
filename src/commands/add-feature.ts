@@ -15,7 +15,8 @@ interface FileToCreate {
 export default defineCommand({
   meta: {
     name: "add:feature",
-    description: "Create a new feature with vertical slice architecture",
+    description:
+      "Create a full-stack feature. Creates: convex/features/<name>/ (schema, queries, mutations), src/features/<name>/ (hooks, components), src/routes/<name>/ (index, $id). Use for data-driven features with backend.",
   },
   args: {
     name: {

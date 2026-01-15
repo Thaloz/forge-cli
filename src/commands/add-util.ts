@@ -8,7 +8,8 @@ import { kebabCase, camelCase } from "../utils/case.js";
 export default defineCommand({
   meta: {
     name: "add:util",
-    description: "Create a new utility function in src/lib",
+    description:
+      "Create a utility function. Creates: src/lib/<name>.ts, updates src/lib/index.ts. Use for shared helpers like formatDate, cn, validators.",
   },
   args: {
     name: {

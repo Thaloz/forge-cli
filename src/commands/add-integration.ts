@@ -25,7 +25,8 @@ function runCommand(cmd: string, args: string[], cwd: string): Promise<void> {
 export default defineCommand({
   meta: {
     name: "add:integration",
-    description: "Add an infrastructure integration (auth, storage)",
+    description:
+      "Add infrastructure. auth: creates convex/auth.ts, src/components/auth/ (LoginForm, SignupForm, AuthGuard, UserMenu), routes. storage: creates convex/lib/storage.ts, src/components/storage/ (FileUpload, FilePreview).",
   },
   args: {
     name: {

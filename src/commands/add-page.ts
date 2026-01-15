@@ -8,7 +8,8 @@ import { kebabCase, pascalCase } from "../utils/case.js";
 export default defineCommand({
   meta: {
     name: "add:page",
-    description: "Create a non-feature page (about, pricing, settings)",
+    description:
+      "Create a standalone page without backend. Creates: src/routes/<name>.tsx, src/components/<name>/<Name>Content.tsx. Use for static pages like about, pricing, settings.",
   },
   args: {
     name: {

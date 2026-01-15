@@ -12,7 +12,8 @@ type LayoutPreset = (typeof LAYOUT_PRESETS)[number];
 export default defineCommand({
   meta: {
     name: "add:layout",
-    description: "Create a layout (dashboard, auth, marketing, or custom)",
+    description:
+      "Create a layout wrapper for grouped routes. Creates: src/routes/<name>/_layout.tsx, index.tsx. Dashboard preset adds Sidebar/Header in src/components/layout/. Use for shared navigation.",
   },
   args: {
     name: {

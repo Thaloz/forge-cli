@@ -26,6 +26,7 @@ const main = defineCommand({
     "add:component": () => import("./commands/add-component.js").then((m) => m.default),
     "add:hook": () => import("./commands/add-hook.js").then((m) => m.default),
     "add:util": () => import("./commands/add-util.js").then((m) => m.default),
+    "add:shared-query": () => import("./commands/add-shared-query.js").then((m) => m.default),
     check: () => import("./commands/check.js").then((m) => m.default),
     version: () => import("./commands/version.js").then((m) => m.default),
   },

@@ -1,0 +1,39 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+/**
+ * Shared queries and mutations for {{fileName}}
+ */
+
+export const list = query({
+  args: {},
+  handler: async (ctx) => {
+    // TODO: Implement list query
+    return [];
+  },
+});
+
+export const getById = query({
+  args: { id: v.id("{{fileName}}") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});
+
+export const create = mutation({
+  args: {
+    // TODO: Define your fields
+    // name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // TODO: Implement create mutation
+    // return await ctx.db.insert("{{fileName}}", { ...args });
+  },
+});
+
+export const remove = mutation({
+  args: { id: v.id("{{fileName}}") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
+  },
+});

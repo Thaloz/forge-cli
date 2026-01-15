@@ -26,7 +26,7 @@ export default defineCommand({
   meta: {
     name: "add:integration",
     description:
-      "Add infrastructure. auth: creates convex/auth.ts, src/components/auth/ (LoginForm, SignupForm, AuthGuard, UserMenu), routes. storage: creates convex/lib/storage.ts, src/components/storage/ (FileUpload, FilePreview).",
+      "Add infrastructure. auth: creates convex/auth.ts, convex/lib/users.ts, src/lib/auth.ts (useCurrentUser), components, routes. storage: creates convex/lib/storage.ts, src/components/storage/.",
   },
   args: {
     name: {
@@ -68,7 +68,7 @@ async function setupAuth(cwd: string): Promise<void> {
   // Install dependencies
   const step1 = logger.step("Installing dependencies...");
   try {
-    await runCommand("pnpm", ["add", "@convex-dev/auth", "@auth/core"], cwd);
+    await runCommand("pnpm", ["add", "@convex-dev/auth", "@auth/core@^0.37.0"], cwd);
     step1.succeed("Dependencies installed");
   } catch {
     step1.fail("Failed to install dependencies");
@@ -85,6 +85,7 @@ async function setupAuth(cwd: string): Promise<void> {
       { template: "integration/auth/convex/auth.ts.hbs", dest: "convex/auth.ts" },
       { template: "integration/auth/convex/auth.config.ts.hbs", dest: "convex/auth.config.ts" },
       { template: "integration/auth/convex/http.ts.hbs", dest: "convex/http.ts" },
+      { template: "integration/auth/convex/lib/users.ts.hbs", dest: "convex/lib/users.ts" },
       { template: "integration/auth/src/lib/auth.ts.hbs", dest: "src/lib/auth.ts" },
     ];
 
@@ -179,18 +180,20 @@ AUTH_GOOGLE_SECRET=
   logger.log(`  ${pc.green("✓")} ${pc.bold("Convex Auth configured!")}`);
   logger.blank();
   logger.log("  Created:");
-  logger.log("    Backend: convex/auth.ts, convex/auth.config.ts");
+  logger.log("    Backend: convex/auth.ts, convex/lib/users.ts");
+  logger.log("    Hooks: useAuth(), useCurrentUser()");
   logger.log("    Components: LoginForm, SignupForm, AuthGuard, UserMenu");
   logger.log("    Routes: /login, /signup");
   logger.blank();
   logger.log("  Next steps:");
-  logger.log("    1. Set up auth secrets: npx @convex-dev/auth");
-  logger.log("    2. Run: npx convex dev");
-  logger.log("    3. Visit: http://localhost:3000/login");
+  logger.log("    1. Run: npx convex dev");
+  logger.log("    2. Visit: http://localhost:3000/login");
   logger.blank();
   logger.log("  Usage:");
-  logger.log("    - Protect routes: <AuthGuard><YourComponent /></AuthGuard>");
-  logger.log("    - Add to header: <UserMenu />");
+  logger.log('    import { useCurrentUser, AuthGuard } from "~/lib/auth";');
+  logger.log("    const user = useCurrentUser(); // Get logged-in user");
+  logger.log("    <AuthGuard>...</AuthGuard>     // Protect routes");
+  logger.log("    <UserMenu />                   // Add to header");
   logger.blank();
 }
 

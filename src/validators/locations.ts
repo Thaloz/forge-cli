@@ -48,11 +48,16 @@ export const componentSubdirValidator: Validator = {
     const errors: ValidationResult["errors"] = [];
     const warnings: ValidationResult["warnings"] = [];
 
-    // Find subdirectories in src/components/ (excluding ui/)
+    // Find subdirectories in src/components/ (excluding known valid directories)
     const subdirs = await fg("src/components/*/", {
       cwd,
       onlyDirectories: true,
-      ignore: ["src/components/ui"],
+      ignore: [
+        "src/components/ui", // shadcn primitives
+        "src/components/auth", // Created by forge add:integration auth
+        "src/components/storage", // Created by forge add:integration storage
+        "src/components/layout", // Created by forge add:layout
+      ],
     });
 
     for (const dir of subdirs) {
@@ -84,6 +89,7 @@ export const hookLocationValidator: Validator = {
       ignore: [
         "node_modules/**",
         "dist/**",
+        "convex/**", // Convex backend files are not React hooks
         "src/features/*/hooks.ts", // Valid location
         "src/hooks/**", // Valid location
         "src/hooks.ts", // Valid location (root hooks file)

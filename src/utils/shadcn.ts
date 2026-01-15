@@ -7,6 +7,8 @@ const SHADCN_DEPS: Record<string, string[]> = {
   feature: ["button", "input", "label"],
   auth: ["button", "input", "label"],
   storage: ["button"],
+  dashboard: ["button", "avatar", "dropdown-menu", "sheet"],
+  marketing: ["button"],
 };
 
 export type ShadcnDependencyType = keyof typeof SHADCN_DEPS;

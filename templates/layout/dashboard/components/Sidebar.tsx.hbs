@@ -1,0 +1,39 @@
+import { Link, useLocation } from "@tanstack/react-router";
+import { cn } from "~/lib/cn";
+
+const navItems = [
+  { href: "/dashboard", label: "Home" },
+  { href: "/dashboard/projects", label: "Projects" },
+  { href: "/dashboard/team", label: "Team" },
+  { href: "/dashboard/settings", label: "Settings" },
+];
+
+export function Sidebar() {
+  const location = useLocation();
+
+  return (
+    <aside className="hidden w-64 border-r bg-muted/40 lg:block">
+      <div className="flex h-14 items-center border-b px-4">
+        <Link to="/" className="font-semibold">
+          Your App
+        </Link>
+      </div>
+      <nav className="space-y-1 p-4">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            to={item.href}
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+              location.pathname === item.href
+                ? "bg-primary text-primary-foreground"
+                : "hover:bg-muted"
+            )}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </aside>
+  );
+}

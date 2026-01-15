@@ -1,0 +1,10 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { {{componentName}}Content } from "~/components/{{componentFolder}}";
+
+export const Route = createFileRoute("/{{name}}")({
+  component: {{componentName}}Page,
+});
+
+function {{componentName}}Page() {
+  return <{{componentName}}Content />;
+}

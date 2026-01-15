@@ -1,0 +1,13 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/{{name}}/")({
+  component: {{pascalName}}Index,
+});
+
+function {{pascalName}}Index() {
+  return (
+    <div>
+      <h1>{{pascalName}}</h1>
+    </div>
+  );
+}

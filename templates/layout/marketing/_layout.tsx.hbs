@@ -1,0 +1,39 @@
+import { Outlet, createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "~/components/ui/button";
+
+export const Route = createFileRoute("/{{name}}")({
+  component: MarketingLayout,
+});
+
+function MarketingLayout() {
+  return (
+    <div className="min-h-screen">
+      <header className="border-b">
+        <div className="container flex h-16 items-center justify-between">
+          <Link to="/" className="text-xl font-bold">
+            Your App
+          </Link>
+          <nav className="flex items-center gap-4">
+            <Link to="/features" className="text-sm hover:underline">
+              Features
+            </Link>
+            <Link to="/pricing" className="text-sm hover:underline">
+              Pricing
+            </Link>
+            <Button asChild size="sm">
+              <Link to="/login">Get Started</Link>
+            </Button>
+          </nav>
+        </div>
+      </header>
+      <main>
+        <Outlet />
+      </main>
+      <footer className="border-t py-8">
+        <div className="container text-center text-sm text-muted-foreground">
+          © 2024 Your App. All rights reserved.
+        </div>
+      </footer>
+    </div>
+  );
+}

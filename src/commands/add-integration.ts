@@ -186,8 +186,9 @@ AUTH_GOOGLE_SECRET=
   logger.log("    Routes: /login, /signup");
   logger.blank();
   logger.log("  Next steps:");
-  logger.log("    1. Run: npx convex dev");
-  logger.log("    2. Visit: http://localhost:3000/login");
+  logger.log("    1. Run: npx @convex-dev/auth (sets up JWT_PRIVATE_KEY)");
+  logger.log("    2. Run: npx convex dev");
+  logger.log("    3. Visit: http://localhost:3000/login");
   logger.blank();
   logger.log("  Usage:");
   logger.log('    import { useCurrentUser, AuthGuard } from "~/lib/auth";');

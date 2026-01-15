@@ -1,0 +1,11 @@
+import { useState, useCallback } from "react";
+
+export function {{hookName}}() {
+  const [state, setState] = useState<unknown>(null);
+
+  const update = useCallback((value: unknown) => {
+    setState(value);
+  }, []);
+
+  return { state, update };
+}

@@ -26,7 +26,7 @@ export default defineCommand({
   meta: {
     name: "add:integration",
     description:
-      "Add infrastructure. auth: creates convex/auth.ts, convex/lib/users.ts, src/lib/auth.ts (useCurrentUser), components, routes. storage: creates convex/lib/storage.ts, src/components/storage/.",
+      "Add infrastructure. auth: creates convex/auth.ts, convex/users.ts, src/lib/auth.ts (useCurrentUser), components, routes. storage: creates convex/lib/storage.ts, src/components/storage/.",
   },
   args: {
     name: {
@@ -85,7 +85,7 @@ async function setupAuth(cwd: string): Promise<void> {
       { template: "integration/auth/convex/auth.ts.hbs", dest: "convex/auth.ts" },
       { template: "integration/auth/convex/auth.config.ts.hbs", dest: "convex/auth.config.ts" },
       { template: "integration/auth/convex/http.ts.hbs", dest: "convex/http.ts" },
-      { template: "integration/auth/convex/lib/users.ts.hbs", dest: "convex/lib/users.ts" },
+      { template: "integration/auth/convex/users.ts.hbs", dest: "convex/users.ts" },
       { template: "integration/auth/src/lib/auth.ts.hbs", dest: "src/lib/auth.ts" },
     ];
 
@@ -180,7 +180,7 @@ AUTH_GOOGLE_SECRET=
   logger.log(`  ${pc.green("✓")} ${pc.bold("Convex Auth configured!")}`);
   logger.blank();
   logger.log("  Created:");
-  logger.log("    Backend: convex/auth.ts, convex/lib/users.ts");
+  logger.log("    Backend: convex/auth.ts, convex/users.ts");
   logger.log("    Hooks: useAuth(), useCurrentUser()");
   logger.log("    Components: LoginForm, SignupForm, AuthGuard, UserMenu");
   logger.log("    Routes: /login, /signup");

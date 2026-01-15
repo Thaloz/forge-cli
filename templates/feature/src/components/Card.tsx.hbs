@@ -1,0 +1,21 @@
+import { Link } from "@tanstack/react-router";
+import type { Doc } from "@convex/_generated/dataModel";
+
+interface {{pascalCase name}}CardProps {
+  {{camelCase name}}: Doc<"{{camelCase name}}">;
+}
+
+export function {{pascalCase name}}Card({ {{camelCase name}} }: {{pascalCase name}}CardProps) {
+  return (
+    <Link
+      to="/{{kebabCase name}}/$id"
+      params=\{{ id: {{camelCase name}}._id }}
+      className="block rounded-lg border p-4 hover:border-foreground transition-colors"
+    >
+      <h3 className="font-medium">{{pascalCase name}}</h3>
+      <p className="text-sm text-muted-foreground">
+        Created {new Date({{camelCase name}}.createdAt).toLocaleDateString()}
+      </p>
+    </Link>
+  );
+}

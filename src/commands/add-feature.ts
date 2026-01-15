@@ -3,8 +3,9 @@ import { join } from "path";
 import { logger } from "../utils/logger.js";
 import { renderTemplate } from "../utils/template.js";
 import { writeFile, fileExists, readFile } from "../utils/fs.js";
-import { kebabCase, camelCase } from "../utils/case.js";
+import { kebabCase, camelCase, pascalCase } from "../utils/case.js";
 import { insertAtMarker } from "../utils/markers.js";
+import { ensureShadcnComponents } from "../utils/shadcn.js";
 
 interface FileToCreate {
   templatePath: string;
@@ -44,6 +45,10 @@ export default defineCommand({
 
     logger.blank();
 
+    // Ensure shadcn components are installed
+    await ensureShadcnComponents(cwd, "feature");
+
+    const pascal = pascalCase(name);
     const templateData = { name };
 
     // Define files to create
@@ -65,11 +70,7 @@ export default defineCommand({
         templatePath: "feature/convex/index.ts.hbs",
         destPath: join(cwd, "convex/features", name, "index.ts"),
       },
-      // Src files
-      {
-        templatePath: "feature/src/components/index.ts.hbs",
-        destPath: join(cwd, "src/features", name, "components/index.ts"),
-      },
+      // Src files - hooks and index
       {
         templatePath: "feature/src/hooks.ts.hbs",
         destPath: join(cwd, "src/features", name, "hooks.ts"),
@@ -77,6 +78,27 @@ export default defineCommand({
       {
         templatePath: "feature/src/index.ts.hbs",
         destPath: join(cwd, "src/features", name, "index.ts"),
+      },
+      // Components
+      {
+        templatePath: "feature/src/components/List.tsx.hbs",
+        destPath: join(cwd, "src/features", name, "components", `${pascal}List.tsx`),
+      },
+      {
+        templatePath: "feature/src/components/Card.tsx.hbs",
+        destPath: join(cwd, "src/features", name, "components", `${pascal}Card.tsx`),
+      },
+      {
+        templatePath: "feature/src/components/Form.tsx.hbs",
+        destPath: join(cwd, "src/features", name, "components", `${pascal}Form.tsx`),
+      },
+      {
+        templatePath: "feature/src/components/Detail.tsx.hbs",
+        destPath: join(cwd, "src/features", name, "components", `${pascal}Detail.tsx`),
+      },
+      {
+        templatePath: "feature/src/components/index.ts.hbs",
+        destPath: join(cwd, "src/features", name, "components/index.ts"),
       },
       // Route files
       {
@@ -103,10 +125,16 @@ export default defineCommand({
     logger.blank();
     logger.log(`  Feature "${name}" created successfully.`);
     logger.blank();
+    logger.log("  Created:");
+    logger.log(`    Backend: convex/features/${name}/`);
+    logger.log(`    Components: ${pascal}List, ${pascal}Card, ${pascal}Form, ${pascal}Detail`);
+    logger.log(`    Routes: /src/routes/${name}/`);
+    logger.blank();
     logger.log("  Next steps:");
     logger.log(`    1. Define your schema in convex/features/${name}/schema.ts`);
-    logger.log("    2. Run `npx convex dev` to sync");
-    logger.log(`    3. Build components in src/features/${name}/components/`);
+    logger.log(`    2. Update form fields in ${pascal}Form.tsx`);
+    logger.log(`    3. Customize ${pascal}Card.tsx display`);
+    logger.log("    4. Run: npx convex dev");
     logger.blank();
   },
 });

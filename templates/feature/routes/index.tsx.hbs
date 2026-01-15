@@ -1,21 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { use{{pascalCase name}}List } from "~/features/{{camelCase name}}";
+import { {{pascalCase name}}List, {{pascalCase name}}Form } from "~/features/{{camelCase name}}";
+import { useState } from "react";
+import { Button } from "~/components/ui/button";
 
 export const Route = createFileRoute("/{{kebabCase name}}/")({
   component: {{pascalCase name}}IndexRoute,
 });
 
 function {{pascalCase name}}IndexRoute() {
-  const { items, isLoading } = use{{pascalCase name}}List();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const [showForm, setShowForm] = useState(false);
 
   return (
-    <div>
-      <h1>{{pascalCase name}}</h1>
-      {/* Build your UI here */}
+    <div className="container py-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">{{pascalCase name}}</h1>
+        <Button onClick={() => setShowForm(!showForm)}>
+          {showForm ? "Cancel" : "Create New"}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="rounded-lg border p-4">
+          <{{pascalCase name}}Form onSuccess={() => setShowForm(false)} />
+        </div>
+      )}
+
+      <{{pascalCase name}}List />
     </div>
   );
 }

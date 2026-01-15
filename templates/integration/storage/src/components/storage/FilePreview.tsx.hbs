@@ -1,0 +1,18 @@
+import { useFileUrl } from "~/lib/storage";
+import type { Id } from "@convex/_generated/dataModel";
+
+interface FilePreviewProps {
+  storageId: Id<"_storage">;
+  alt?: string;
+  className?: string;
+}
+
+export function FilePreview({ storageId, alt = "File preview", className }: FilePreviewProps) {
+  const url = useFileUrl(storageId);
+
+  if (!url) {
+    return <div className="animate-pulse bg-muted h-32 rounded" />;
+  }
+
+  return <img src={url} alt={alt} className={className ?? "rounded object-cover"} />;
+}

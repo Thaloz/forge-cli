@@ -1,0 +1,36 @@
+"use client";
+
+import { useAuthActions } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
+import { Button } from "~/components/ui/button";
+import { useNavigate } from "@tanstack/react-router";
+
+export function UserMenu() {
+  const { isAuthenticated } = useConvexAuth();
+  const { signOut } = useAuthActions();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex gap-2">
+        <Button variant="ghost" onClick={() => navigate({ to: "/login" })}>
+          Sign in
+        </Button>
+        <Button onClick={() => navigate({ to: "/signup" })}>
+          Sign up
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button variant="ghost" onClick={handleSignOut}>
+      Sign out
+    </Button>
+  );
+}

@@ -1,0 +1,26 @@
+import { use{{pascalCase name}}List } from "../hooks";
+import { {{pascalCase name}}Card } from "./{{pascalCase name}}Card";
+
+export function {{pascalCase name}}List() {
+  const { items, isLoading } = use{{pascalCase name}}List();
+
+  if (isLoading) {
+    return <div className="animate-pulse">Loading...</div>;
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-12 text-muted-foreground">
+        No {{name}} yet. Create your first one!
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => (
+        <{{pascalCase name}}Card key={item._id} {{camelCase name}}={item} />
+      ))}
+    </div>
+  );
+}

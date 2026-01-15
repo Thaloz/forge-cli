@@ -1,0 +1,46 @@
+import { useState } from "react";
+import { use{{pascalCase name}}Mutations } from "../hooks";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+
+interface {{pascalCase name}}FormProps {
+  onSuccess?: () => void;
+}
+
+export function {{pascalCase name}}Form({ onSuccess }: {{pascalCase name}}FormProps) {
+  const { create } = use{{pascalCase name}}Mutations();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      await create({
+        // Add your fields here from formData
+        // Example: name: formData.get("name") as string,
+      });
+      e.currentTarget.reset();
+      onSuccess?.();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Add your form fields here */}
+      <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" name="name" required />
+      </div>
+
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? "Creating..." : "Create {{pascalCase name}}"}
+      </Button>
+    </form>
+  );
+}

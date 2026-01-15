@@ -1,0 +1,28 @@
+import { use{{pascalCase name}} } from "../hooks";
+import type { Id } from "@convex/_generated/dataModel";
+
+interface {{pascalCase name}}DetailProps {
+  id: Id<"{{camelCase name}}">;
+}
+
+export function {{pascalCase name}}Detail({ id }: {{pascalCase name}}DetailProps) {
+  const { item, isLoading } = use{{pascalCase name}}(id);
+
+  if (isLoading) {
+    return <div className="animate-pulse">Loading...</div>;
+  }
+
+  if (!item) {
+    return <div>Not found</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <h1 className="text-2xl font-bold">{{pascalCase name}} Details</h1>
+      {/* Customize your detail view here */}
+      <pre className="rounded bg-muted p-4 text-sm overflow-auto">
+        {JSON.stringify(item, null, 2)}
+      </pre>
+    </div>
+  );
+}

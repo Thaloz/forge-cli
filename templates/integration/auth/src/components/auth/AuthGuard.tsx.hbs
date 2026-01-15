@@ -1,0 +1,31 @@
+"use client";
+
+import { useConvexAuth } from "convex/react";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+
+interface AuthGuardProps {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export function AuthGuard({ children, fallback }: AuthGuardProps) {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate({ to: "/login" });
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return fallback ?? <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
